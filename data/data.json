@@ -1,0 +1,59 @@
+{
+ "Buku": [
+  {
+   "ID": 1,
+   "Judul": "LAUT BERCERITA",
+   "TahunTerbit": 2026,
+   "Jumlaheksamplar": 30,
+   "JumlahTersedia": 29
+  }
+ ],
+ "Anggota": [
+  {
+   "IDAnggota": 2,
+   "Nama": "suyadi",
+   "TanggalBergabung": "2026-11-06T17:57:10.995823792+07:00"
+  }
+ ],
+ "Peminjaman": [
+  {
+   "IDpinjam": 0,
+   "IDPeminjam": 2,
+   "IDbukudipinjam": 1,
+   "Tanggalpinjam": "2026-11-08T18:41:39.50954735+07:00",
+   "Tenggat": "2026-11-11T18:41:39.50954735+07:00",
+   "TanggalKembali": "2026-11-08T19:18:06.266964588+07:00",
+   "Denda": -2000
+  },
+  {
+   "IDpinjam": 1,
+   "IDPeminjam": 2,
+   "IDbukudipinjam": 1,
+   "Tanggalpinjam": "2026-11-08T19:13:56.253250764+07:00",
+   "Tenggat": "2026-11-11T19:13:56.253250764+07:00",
+   "TanggalKembali": "2026-11-08T19:19:34.543076187+07:00",
+   "Denda": -2000
+  },
+  {
+   "IDpinjam": 2,
+   "IDPeminjam": 2,
+   "IDbukudipinjam": 1,
+   "Tanggalpinjam": "2026-11-08T19:27:38.437151927+07:00",
+   "Tenggat": "2026-11-11T19:27:38.437151927+07:00",
+   "TanggalKembali": "2026-11-08T19:27:52.789424826+07:00",
+   "Denda": 0
+  },
+  {
+   "IDpinjam": 3,
+   "IDPeminjam": 2,
+   "IDbukudipinjam": 1,
+   "Tanggalpinjam": "2026-11-08T19:35:50.227745281+07:00",
+   "Tenggat": "2026-11-11T19:35:50.227745281+07:00",
+   "TanggalKembali": "0001-01-01T00:00:00Z",
+   "Denda": 0
+  }
+ ],
+ "NewIDpeminjaman": 4,
+ "NewIdAnggota": 3,
+ "NewId": 2
+}
