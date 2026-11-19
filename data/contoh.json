@@ -1,0 +1,16 @@
+{
+ "Buku": [
+  {
+   "ID": 1,
+   "Judul": "Contoh Buku",
+   "TahunTerbit": 2024,
+   "Jumlaheksamplar": 3,
+   "JumlahTersedia": 3
+  }
+ ],
+ "Anggota": [],
+ "Peminjaman": [],
+ "NewIDpeminjaman": 1,
+ "NewIdAnggota": 1,
+ "NewId": 2
+}

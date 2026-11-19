@@ -14,7 +14,7 @@ web page and REST API use the same business logic and the same database.
 - **Web interface**: plain HTML, CSS, and JavaScript, no frontend framework
 - **REST API**: JSON endpoints for all main operations
 - **PostgreSQL storage**: tables are created automatically on startup
-- **JSON import**: move data from the old `data/data.json` file into PostgreSQL
+- **JSON import**: move data from an old JSON file into PostgreSQL
 
 ## Rules
 
@@ -53,7 +53,7 @@ perpustakaan_cli/
 │   ├── index.html
 │   ├── style.css
 │   └── app.js
-├── data/data.json   # Old sample data, can be imported once
+├── data/contoh.json # Safe sample data for testing the import
 ├── .env.example     # Example database configuration
 ├── docker-compose.yml
 └── go.mod
@@ -74,11 +74,24 @@ The easiest way is Docker:
 docker compose up -d
 ```
 
+Before starting Docker, create your local configuration:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+```
+
+Edit `.env` and set `POSTGRES_PASSWORD` to your own password. The Compose file
+uses that variable, so the password is not stored in `docker-compose.yml`.
+
+The container is bound to `127.0.0.1`, which means the database can only be
+reached from this computer, not from the local network.
+
 The included Compose file creates:
 
 - database: `db_library`
 - user: `library`
-- password: `library36`
+- password: from `POSTGRES_PASSWORD` in `.env`
 - host port: `5433` (inside the container it is still `5432`)
 
 Port `5433` is used so the container does not conflict with a local
@@ -88,28 +101,21 @@ If you already have PostgreSQL installed, create the database and user
 manually:
 
 ```sql
-CREATE USER library WITH PASSWORD 'library36';
+CREATE USER library WITH PASSWORD 'your_password_here';
 CREATE DATABASE db_library OWNER library;
 ```
 
-The application reads the connection string from `DATABASE_URL`. The easiest
-way is to copy `.env.example` to `.env` and change the value:
-
-```bash
-cp .env.example .env
-```
-
-Example for the Docker database:
+The application reads the connection string from `DATABASE_URL` in `.env`:
 
 ```text
-DATABASE_URL=postgres://library:library36@localhost:5433/db_library?sslmode=disable
+DATABASE_URL=postgres://library:your_password_here@localhost:5433/db_library?sslmode=disable
 ```
 
 The app reads `.env` automatically at startup. A value that is already set in
 the terminal still takes priority. You can also run it directly:
 
 ```bash
-DATABASE_URL="postgres://library:library36@localhost:5433/db_library?sslmode=disable" go run . -web
+DATABASE_URL="postgres://library:your_password_here@localhost:5433/db_library?sslmode=disable" go run . -web
 ```
 
 When it connects, the app prints the target database without the password:
@@ -144,12 +150,15 @@ the other.
 
 ### 4. Import old JSON data (optional)
 
-If you want to move the old JSON data into PostgreSQL, run this once on an empty
+If you want to move old JSON data into PostgreSQL, run this once on an empty
 database:
 
 ```bash
-go run . -import data/data.json
+go run . -import data/contoh.json
 ```
+
+You can also point it to your own JSON file. Real data files should not be
+committed to Git.
 
 The import is refused when the database already contains books, members, or
 loans.
@@ -236,8 +245,8 @@ running.
 
 - This project has no login or access control. It is meant for local use or a
   trusted network.
-- The old JSON file is no longer used for daily storage. It is kept as sample
-  data and as the source for `-import`.
+- The old JSON format is only used by `-import`. Real JSON data files are not
+  tracked by Git.
 - The frontend files are embedded into the Go binary, so the web app works even
   when the binary is started from another directory.
 - `.env` is ignored by Git because it contains the database password.

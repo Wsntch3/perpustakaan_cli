@@ -12,3 +12,6 @@ perpustakaan.exe
 
 # Konfigurasi lokal (berisi password database)
 .env
+
+# Data lokal, jangan ikut di-commit
+data/data.json

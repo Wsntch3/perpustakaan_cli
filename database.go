@@ -46,10 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_peminjaman_anggota
 `
 
 func alamatDatabase() string {
-	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
-		return dsn
-	}
-	return "postgres://library:library36@localhost:5432/db_library?sslmode=disable"
+	return os.Getenv("DATABASE_URL")
 }
 
 // Tampilkan tujuan koneksi tanpa membocorkan password.
@@ -65,7 +62,12 @@ func infoDatabase(dsn string) string {
 }
 
 func bukaDatabase() error {
-	conn, err := sql.Open("postgres", alamatDatabase())
+	dsn := alamatDatabase()
+	if dsn == "" {
+		return fmt.Errorf("DATABASE_URL belum diatur, salin .env.example menjadi .env")
+	}
+
+	conn, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return err
 	}
@@ -79,7 +81,7 @@ func bukaDatabase() error {
 	}
 
 	db = conn
-	fmt.Printf("TERHUBUNG KE DATABASE: %s\n", infoDatabase(alamatDatabase()))
+	fmt.Printf("TERHUBUNG KE DATABASE: %s\n", infoDatabase(dsn))
 
 	if err := buatTabel(); err != nil {
 		conn.Close()
