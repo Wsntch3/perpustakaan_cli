@@ -36,7 +36,22 @@ func (l *library) addbuku(b buku) *buku {
 func (l *library) removebuku(id int) error {
 	for i := range l.Buku {
 		if l.Buku[i].ID == id {
+			for _, p := range l.Peminjaman {
+				if p.IDBuku == id && p.TanggalKembali.IsZero() {
+					return errors.New("BUKU MASIH DIPINJAM")
+				}
+			}
+
 			l.Buku = append(l.Buku[:i], l.Buku[i+1:]...)
+
+			var sisa []peminjaman
+			for _, p := range l.Peminjaman {
+				if p.IDBuku != id {
+					sisa = append(sisa, p)
+				}
+			}
+			l.Peminjaman = sisa
+
 			return nil
 		}
 	}
@@ -108,8 +123,23 @@ func (l *library) tampilkananggota() []anggota {
 func (l *library) hapusanggota(id int) (*anggota, error) {
 	for i := range l.Anggota {
 		if l.Anggota[i].IDAnggota == id {
+			for _, p := range l.Peminjaman {
+				if p.IDPeminjam == id && p.TanggalKembali.IsZero() {
+					return nil, errors.New("ANGGOTA MASIH MEMILIKI PEMINJAMAN AKTIF")
+				}
+			}
+
 			dihapus := l.Anggota[i]
 			l.Anggota = append(l.Anggota[:i], l.Anggota[i+1:]...)
+
+			var sisa []peminjaman
+			for _, p := range l.Peminjaman {
+				if p.IDPeminjam != id {
+					sisa = append(sisa, p)
+				}
+			}
+			l.Peminjaman = sisa
+
 			return &dihapus, nil
 		}
 	}

@@ -1,0 +1,14 @@
+# Binary hasil build
+library
+library.exe
+perpuscli
+perpuscli.exe
+perpustakaan
+perpustakaan.exe
+*.exe
+
+# File test
+*.test
+
+# Konfigurasi lokal (berisi password database)
+.env

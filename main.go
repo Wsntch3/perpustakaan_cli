@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -11,7 +12,6 @@ import (
 )
 
 var reader = bufio.NewReader(os.Stdin)
-
 
 func bacaString(prompt string) string {
 	fmt.Print(prompt)
@@ -28,7 +28,6 @@ func bacaString(prompt string) string {
 	}
 	return strings.TrimSpace(teks)
 }
-
 
 func bacaInt(prompt string) int {
 	for {
@@ -84,9 +83,9 @@ func inputanggota() anggota {
 }
 
 func menubuku() {
-	dataperpus, err := loaddata("data/data.json")
+	dataperpus, err := muatData()
 	if err != nil {
-		fmt.Println("FILE TIDAK DAPAT DIBUKA:", err)
+		fmt.Println("DATA TIDAK DAPAT DIMUAT:", err)
 		return
 	}
 
@@ -106,7 +105,7 @@ func menubuku() {
 		case 1:
 			b := inoutbuku()
 			baru := dataperpus.addbuku(b)
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MELAKUKAN OPERASI:", err)
 				continue
 			}
@@ -117,7 +116,7 @@ func menubuku() {
 				fmt.Println("GAGAL MENGHAPUS BUKU:", err)
 				continue
 			}
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MENYIMPAN DATA:", err)
 				continue
 			}
@@ -167,7 +166,7 @@ func menubuku() {
 				fmt.Println("GAGAL MENAMBAHKAN TOTAL:", err)
 				continue
 			}
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MENYIMPAN DATA:", err)
 				continue
 			}
@@ -179,9 +178,9 @@ func menubuku() {
 }
 
 func pinjaman() {
-	dataperpus, err := loaddata("data/data.json")
+	dataperpus, err := muatData()
 	if err != nil {
-		fmt.Println("FILE TIDAK DAPAT DIBUKA:", err)
+		fmt.Println("DATA TIDAK DAPAT DIMUAT:", err)
 		return
 	}
 
@@ -205,7 +204,7 @@ func pinjaman() {
 				fmt.Println("GAGAL MELAKUKAN OPERASI:", err)
 				continue
 			}
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MENYIMPAN DATA:", err)
 				continue
 			}
@@ -220,7 +219,7 @@ func pinjaman() {
 				fmt.Println("GAGAL:", err)
 				continue
 			}
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MENYIMPAN DATA:", err)
 				continue
 			}
@@ -261,9 +260,9 @@ func pinjaman() {
 }
 
 func menuanggota() {
-	dataperpus, err := loaddata("data/data.json")
+	dataperpus, err := muatData()
 	if err != nil {
-		fmt.Println("FILE TIDAK DAPAT DIBUKA:", err)
+		fmt.Println("DATA TIDAK DAPAT DIMUAT:", err)
 		return
 	}
 
@@ -281,7 +280,7 @@ func menuanggota() {
 		case 1:
 			a := inputanggota()
 			baru := dataperpus.tambahanggota(a)
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MELAKUKAN OPERASI:", err)
 				continue
 			}
@@ -322,7 +321,7 @@ func menuanggota() {
 				fmt.Println("GAGAL MENGHAPUS ANGGOTA:", err)
 				continue
 			}
-			if err := savedata("data/data.json", dataperpus); err != nil {
+			if err := simpanData(dataperpus); err != nil {
 				fmt.Println("GAGAL MENYIMPAN DATA:", err)
 				continue
 			}
@@ -334,6 +333,61 @@ func menuanggota() {
 }
 
 func main() {
+	web := flag.Bool("web", false, "jalankan REST API dan antarmuka web")
+	alamat := flag.String("addr", ":8080", "alamat server web")
+	fileImpor := flag.String("import", "", "impor data dari file JSON ke database")
+	flag.Parse()
+
+	bacaEnv(".env")
+
+	if err := bukaDatabase(); err != nil {
+		fmt.Println("DATABASE ERROR:", err)
+		return
+	}
+	defer tutupDatabase()
+
+	if *fileImpor != "" {
+		if err := imporJSON(*fileImpor); err != nil {
+			fmt.Println("IMPOR GAGAL:", err)
+			return
+		}
+		return
+	}
+
+	if *web {
+		if err := jalankanServer(*alamat); err != nil {
+			fmt.Println("SERVER GAGAL:", err)
+		}
+		return
+	}
+
+	menuutama()
+}
+
+func imporJSON(file string) error {
+	l, err := loaddata(file)
+	if err != nil {
+		return err
+	}
+
+	kosong, err := databaseKosong()
+	if err != nil {
+		return err
+	}
+	if !kosong {
+		return fmt.Errorf("database sudah berisi data, impor dibatalkan")
+	}
+
+	if err := simpanData(l); err != nil {
+		return err
+	}
+
+	fmt.Printf("IMPOR SELESAI: %d buku, %d anggota, %d peminjaman\n",
+		len(l.Buku), len(l.Anggota), len(l.Peminjaman))
+	return nil
+}
+
+func menuutama() {
 	for {
 		fmt.Println("SILAHKAN PILIH MENU: ")
 		fmt.Println("1. MENU BUKU")

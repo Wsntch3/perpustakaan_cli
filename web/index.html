@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perpustakaan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Perpustakaan</h1>
+    <p>Kelola buku, anggota, dan peminjaman dalam satu tempat.</p>
+  </header>
+
+  <div id="pesan" class="pesan" hidden></div>
+
+  <main>
+    <nav class="tabs">
+      <button class="tab active" data-tab="buku" type="button">Buku</button>
+      <button class="tab" data-tab="anggota" type="button">Anggota</button>
+      <button class="tab" data-tab="peminjaman" type="button">Peminjaman</button>
+    </nav>
+
+    <section id="tab-buku" class="panel active">
+      <div class="judul-panel">
+        <h2>Daftar Buku</h2>
+        <input id="cari-buku" type="search" placeholder="Cari judul buku">
+      </div>
+
+      <form id="form-buku" class="form-baris">
+        <input name="judul" placeholder="Judul buku" required>
+        <input name="tahun_terbit" type="number" placeholder="Tahun terbit" min="1" required>
+        <input name="jumlah_eksemplar" type="number" placeholder="Jumlah eksemplar" min="1" required>
+        <button class="tombol" type="submit">Tambah Buku</button>
+      </form>
+
+      <div class="tabel-bungkus">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Judul</th>
+              <th>Tahun</th>
+              <th>Tersedia</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabel-buku"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-anggota" class="panel">
+      <div class="judul-panel">
+        <h2>Daftar Anggota</h2>
+      </div>
+
+      <form id="form-anggota" class="form-baris">
+        <input name="nama" placeholder="Nama anggota" required>
+        <button class="tombol" type="submit">Tambah Anggota</button>
+      </form>
+
+      <div class="tabel-bungkus">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nama</th>
+              <th>Tanggal Bergabung</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabel-anggota"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-peminjaman" class="panel">
+      <div class="judul-panel">
+        <h2>Peminjaman</h2>
+        <label class="cek">
+          <input id="hanya-aktif" type="checkbox" checked>
+          Hanya yang aktif
+        </label>
+      </div>
+
+      <form id="form-peminjaman" class="form-baris">
+        <select id="pilih-buku" name="buku_id" required>
+          <option value="">Pilih buku</option>
+        </select>
+        <select id="pilih-anggota" name="anggota_id" required>
+          <option value="">Pilih anggota</option>
+        </select>
+        <button class="tombol" type="submit">Pinjam Buku</button>
+      </form>
+
+      <div class="tabel-bungkus">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Buku</th>
+              <th>Anggota</th>
+              <th>Tanggal Pinjam</th>
+              <th>Tenggat</th>
+              <th>Status</th>
+              <th>Denda</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabel-peminjaman"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>Data disimpan di PostgreSQL.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

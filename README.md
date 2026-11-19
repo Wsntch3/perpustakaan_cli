@@ -1,246 +1,246 @@
-# Perpustakaan CLI
+# Perpustakaan
 
-Aplikasi **manajemen perpustakaan berbasis command-line (CLI)** yang dibangun dengan **Go (Golang)**. Project ini mengelola data buku, anggota, serta proses peminjaman dan pengembalian buku secara sederhana, dengan penyimpanan data permanen menggunakan file **JSON**.
+A small library management project written in Go. It can be used from the
+terminal or from a web browser, and all data is stored in PostgreSQL.
 
-Project ini dibuat sebagai implementasi konsep dasar pengembangan perangkat lunak: struktur data, operasi CRUD, validasi aturan bisnis, dan persistensi data — tanpa bergantung pada database eksternal.
+The project started as a CLI application. The CLI is still available, while the
+web page and REST API use the same business logic and the same database.
 
----
+## Features
 
-## Fitur Utama
+- **Books**: add, search, list, delete, and add stock
+- **Members**: add, search, list, and delete
+- **Loans**: borrow and return books, with automatic due dates and fines
+- **Web interface**: plain HTML, CSS, and JavaScript, no frontend framework
+- **REST API**: JSON endpoints for all main operations
+- **PostgreSQL storage**: tables are created automatically on startup
+- **JSON import**: move data from the old `data/data.json` file into PostgreSQL
 
-### Manajemen Buku
-- Menambah buku baru dengan judul, tahun terbit, jumlah eksemplar, dan stok tersedia
-- Menghapus buku berdasarkan ID
-- Mencari buku berdasarkan judul (pencarian sebagian, tidak case-sensitive)
-- Menampilkan seluruh daftar buku
-- Menambah stok buku yang sudah ada
+## Rules
 
-### Manajemen Anggota
-- Mendaftarkan anggota baru (ID dan tanggal bergabung dibuat otomatis)
-- Mencari anggota berdasarkan ID
-- Menampilkan seluruh anggota
-- Menghapus anggota berdasarkan ID
+1. A member can borrow at most **3 books** at the same time.
+2. A member with an overdue loan cannot borrow another book.
+3. A book can only be borrowed when its available stock is more than zero.
+4. The due date is **3 days** after the borrowing date.
+5. A late return costs **Rp1.000 per day**.
+6. A book cannot be returned twice.
+7. A book or member that still has an active loan cannot be deleted.
 
-### Peminjaman & Pengembalian
-- Meminjam buku dengan validasi:
-  - Buku harus tersedia
-  - Maksimal **3 buku aktif** per anggota
-  - Anggota tidak boleh memiliki pinjaman yang terlambat
-- Tenggat peminjaman otomatis **3 hari** setelah tanggal pinjam
-- Pengembalian buku dengan perhitungan denda otomatis
-- Menampilkan daftar peminjaman yang masih aktif
-- Stok buku otomatis berkurang saat dipinjam dan bertambah saat dikembalikan
+## Tech Stack
 
-### Persistensi Data
-- Seluruh data disimpan otomatis ke `data/data.json`
-- ID buku, anggota, dan peminjaman menggunakan auto-increment
-- Counter ID otomatis disinkronkan dengan data yang sudah ada saat file dimuat
-- Data tetap tersimpan meskipun program ditutup
-
-### Validasi & Ketahanan
-- Input angka divalidasi dan diulang jika pengguna memasukkan bukan angka
-- Judul buku dan nama anggota tidak boleh kosong
-- Jumlah stok tidak boleh melebihi jumlah eksemplar
-- Folder `data/` dibuat otomatis jika belum tersedia
-- Operasi yang gagal tidak menghentikan program (tidak ada panic)
-- Business logic inti dilindungi unit test
-
----
-
-## Teknologi yang Digunakan
-
-| Komponen | Keterangan |
+| Part | Used |
 | --- | --- |
-| Bahasa | Go (Golang) 1.26+ |
-| Penyimpanan | File JSON lokal (`data/data.json`) |
-| Antarmuka | Terminal / Command Line |
-| Library | Hanya standard library (`encoding/json`, `os`, `bufio`, `time`, dll.) |
+| Language | Go 1.26+ |
+| Database | PostgreSQL |
+| Database driver | `github.com/lib/pq` |
+| Web server | Go standard library (`net/http`) |
+| Frontend | HTML, CSS, vanilla JavaScript |
 
-Project ini sengaja tidak menggunakan framework atau dependency eksternal agar fokus pada logika dan struktur program.
-
----
-
-## Struktur Project
+## Project Structure
 
 ```
 perpustakaan_cli/
-├── main.go        # Entry point, menu utama, dan handler input pengguna
-├── library.go     # Struct inti & seluruh business logic perpustakaan
-├── book.go        # Model/struct buku
-├── anggota.go     # Model/struct anggota
-├── borrow.go      # Model/struct peminjaman
-├── file.go        # Load & save data JSON
-├── library_test.go # Unit test untuk business logic inti
-├── go.mod         # Metadata module Go
-└── data/
-    └── data.json  # Penyimpanan data aplikasi
+├── main.go          # Entry point, command-line menus, and flags
+├── library.go       # Business logic
+├── database.go      # PostgreSQL connection, tables, load and save
+├── env.go           # Small reader for the .env file
+├── api.go           # REST API and static web server
+├── book.go          # Book model
+├── anggota.go       # Member model
+├── borrow.go        # Loan model
+├── file.go          # JSON load/save helpers (used for import and tests)
+├── web/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── data/data.json   # Old sample data, can be imported once
+├── .env.example     # Example database configuration
+├── docker-compose.yml
+└── go.mod
 ```
 
-### Penjelasan Singkat
+## Requirements
 
-- **`main.go`** — Menjalankan program, menampilkan menu, dan menghubungkan input pengguna dengan fungsi pada `library.go`.
-- **`library.go`** — Pusat logika aplikasi: CRUD buku & anggota, validasi peminjaman, perhitungan denda, dan pengembalian buku.
-- **`file.go`** — Membaca dan menulis data ke JSON. Jika file belum ada, aplikasi otomatis membuat data awal (default).
-- **`library_test.go`** — Unit test untuk CRUD, validasi peminjaman, perhitungan denda, dan persistensi data.
-- **`book.go`, `anggota.go`, `borrow.go`** — Definisi entitas beserta tag JSON untuk serialisasi.
+- Go 1.26 or newer
+- PostgreSQL 14 or newer, or Docker
 
----
+## Setup
 
-## Model Data
+### 1. Start PostgreSQL
 
-### Buku
-
-| Field | Tipe | Deskripsi |
-| --- | --- | --- |
-| `ID` | `int` | ID unik buku |
-| `Judul` | `string` | Judul buku |
-| `TahunTerbit` | `int` | Tahun terbit |
-| `Jumlaheksamplar` | `int` | Total eksemplar yang dimiliki |
-| `JumlahTersedia` | `int` | Stok yang sedang tersedia |
-
-### Anggota
-
-| Field | Tipe | Deskripsi |
-| --- | --- | --- |
-| `IDAnggota` | `int` | ID unik anggota |
-| `Nama` | `string` | Nama anggota |
-| `TanggalBergabung` | `time.Time` | Waktu pendaftaran |
-
-### Peminjaman
-
-| Field | Tipe | Deskripsi |
-| --- | --- | --- |
-| `IDpinjam` | `int` | ID unik transaksi peminjaman |
-| `IDPeminjam` | `int` | ID anggota peminjam |
-| `IDBuku` | `int` | ID buku yang dipinjam |
-| `Tanggalpinjam` | `time.Time` | Waktu peminjaman |
-| `Tenggat` | `time.Time` | Batas waktu pengembalian |
-| `TanggalKembali` | `time.Time` | Waktu pengembalian (zero value jika belum) |
-| `Denda` | `int` | Denda keterlambatan (Rupiah) |
-
----
-
-## Aturan Bisnis
-
-1. Setiap anggota maksimal meminjam **3 buku aktif** secara bersamaan.
-2. Anggota yang masih memiliki buku terlambat **tidak dapat meminjam** buku baru.
-3. Buku hanya dapat dipinjam jika `JumlahTersedia > 0`.
-4. Tenggat pengembalian adalah **3 hari** setelah tanggal pinjam.
-5. Denda keterlambatan dihitung **Rp1.000 per hari**.
-6. Buku yang sudah dikembalikan tidak dapat dikembalikan dua kali.
-7. Stok tersedia tidak akan melebihi jumlah eksemplar.
-
----
-
-## Cara Menjalankan
-
-### Prasyarat
-
-- Go **1.26 atau lebih baru** sudah terpasang.
-  Cek dengan:
-
-  ```bash
-  go version
-  ```
-
-### Menjalankan Langsung
+The easiest way is Docker:
 
 ```bash
-git clone <URL_REPOSITORY>
-cd perpustakaan_cli
+docker compose up -d
+```
+
+The included Compose file creates:
+
+- database: `db_library`
+- user: `library`
+- password: `library36`
+- host port: `5433` (inside the container it is still `5432`)
+
+Port `5433` is used so the container does not conflict with a local
+PostgreSQL server on `5432`.
+
+If you already have PostgreSQL installed, create the database and user
+manually:
+
+```sql
+CREATE USER library WITH PASSWORD 'library36';
+CREATE DATABASE db_library OWNER library;
+```
+
+The application reads the connection string from `DATABASE_URL`. The easiest
+way is to copy `.env.example` to `.env` and change the value:
+
+```bash
+cp .env.example .env
+```
+
+Example for the Docker database:
+
+```text
+DATABASE_URL=postgres://library:library36@localhost:5433/db_library?sslmode=disable
+```
+
+The app reads `.env` automatically at startup. A value that is already set in
+the terminal still takes priority. You can also run it directly:
+
+```bash
+DATABASE_URL="postgres://library:library36@localhost:5433/db_library?sslmode=disable" go run . -web
+```
+
+When it connects, the app prints the target database without the password:
+
+```text
+TERHUBUNG KE DATABASE: library@localhost:5433/db_library
+```
+
+### 2. Run the web app
+
+```bash
+go mod download
+go run . -web
+```
+
+Open <http://localhost:8080>.
+
+To use another port:
+
+```bash
+go run . -web -addr :3000
+```
+
+### 3. Run the CLI
+
+```bash
 go run .
 ```
 
-### Build Menjadi Binary
+The CLI and the web app share the same data, so changes from one are visible in
+the other.
+
+### 4. Import old JSON data (optional)
+
+If you want to move the old JSON data into PostgreSQL, run this once on an empty
+database:
 
 ```bash
-go build -o perpustakaan
-./perpustakaan
+go run . -import data/data.json
 ```
 
-> Folder `data/` dan file `data/data.json` akan dibuat otomatis saat data pertama kali disimpan, sehingga aplikasi tetap bisa dijalankan dari kondisi bersih.
+The import is refused when the database already contains books, members, or
+loans.
 
----
+## REST API
 
-## 🧪 Pengujian
+All endpoints return JSON. Errors use the form `{"error": "message"}`.
 
-Project ini memiliki unit test untuk memverifikasi business logic inti, termasuk regresi bug pada pengelolaan anggota dan persistensi data.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/books` | List books. Add `?search=keyword` to search by title. |
+| `GET` | `/api/books/{id}` | Get one book. |
+| `POST` | `/api/books` | Add a book. |
+| `DELETE` | `/api/books/{id}` | Delete a book. |
+| `POST` | `/api/books/{id}/stock` | Add stock. Body: `{"tambahan": 2}`. |
+| `GET` | `/api/members` | List members. |
+| `GET` | `/api/members/{id}` | Get one member. |
+| `POST` | `/api/members` | Add a member. Body: `{"nama": "Rina"}`. |
+| `DELETE` | `/api/members/{id}` | Delete a member. |
+| `GET` | `/api/loans` | List loans. Add `?active=1` for active loans only. |
+| `POST` | `/api/loans` | Borrow a book. Body: `{"buku_id": 1, "anggota_id": 1}`. |
+| `POST` | `/api/loans/{id}/return` | Return a book. |
+
+### Examples
 
 ```bash
-go test ./... -v
+# List books
+curl http://localhost:8080/api/books
+
+# Add a book
+curl -X POST http://localhost:8080/api/books \
+  -H "Content-Type: application/json" \
+  -d '{"judul": "Bumi Manusia", "tahun_terbit": 1980, "jumlah_eksemplar": 3}'
+
+# Add a member
+curl -X POST http://localhost:8080/api/members \
+  -H "Content-Type: application/json" \
+  -d '{"nama": "Rina"}'
+
+# Borrow a book
+curl -X POST http://localhost:8080/api/loans \
+  -H "Content-Type: application/json" \
+  -d '{"buku_id": 1, "anggota_id": 1}'
+
+# Return a book
+curl -X POST http://localhost:8080/api/loans/1/return
 ```
 
-Cakupan pengujian meliputi:
+A book response looks like this:
 
-- Penambahan, pencarian, dan penghapusan buku
-- Penambahan dan penghapusan anggota (termasuk anggota terakhir)
-- Validasi stok dan batas peminjaman
-- Peminjaman, pengembalian, dan perhitungan denda
-- Penyimpanan/muat data JSON serta sinkronisasi counter ID
-
----
-
-## 🖥️ Contoh Penggunaan
-
-Saat program dijalankan, pengguna akan disajikan menu utama:
-
-```text
-SILAHKAN PILIH MENU:
-1. MENU BUKU
-2. MENU ANGGOTA
-3. MENU PINJAM BUKU
-0. EXIT
-PILIHAN:
+```json
+{
+  "id": 1,
+  "judul": "Bumi Manusia",
+  "tahun_terbit": 1980,
+  "jumlah_eksemplar": 3,
+  "jumlah_tersedia": 3
+}
 ```
 
-### Alur Singkat
+## Database Tables
 
-1. Pilih **Menu Buku** → tambahkan buku beserta stoknya.
-2. Pilih **Menu Anggota** → daftarkan anggota baru dan catat ID-nya.
-3. Pilih **Menu Pinjam Buku** → masukkan ID buku dan ID anggota.
-4. Untuk pengembalian, pilih menu **Kembalikan Buku**, lalu masukkan **ID peminjaman**.
-5. Gunakan menu **Daftar Peminjaman Aktif** untuk melihat status pinjaman, tenggat, dan denda.
+The app creates these tables automatically:
 
----
+- `buku` — books and stock
+- `anggota` — library members
+- `peminjaman` — loan history
+- `counter` — next ID for books, members, and loans
 
-## 🏗️ Alur Arsitektur
+For each write, the app loads the current data, applies the rules, and saves the
+result in one transaction. This keeps the code simple. It is fine for a small
+library, but not designed for large numbers of users writing at the same time.
 
-```text
-┌─────────────────────┐
-│      main.go        │
-│  Menu & Input CLI   │
-└──────────┬──────────┘
-           │ memanggil
-           ▼
-┌─────────────────────┐        ┌──────────────────┐
-│     library.go      │◄──────►│  Model (struct)  │
-│   Business Logic    │        │ book / anggota / │
-│  CRUD & Validasi    │        │    peminjaman    │
-└──────────┬──────────┘        └──────────────────┘
-           │ load / save
-           ▼
-┌─────────────────────┐
-│      file.go        │
-│  JSON Persistence   │
-└──────────┬──────────┘
-           ▼
-     data/data.json
+## Tests
+
+```bash
+go test ./...
 ```
 
-Pemisahan ini membuat kode lebih mudah dibaca, diuji, dan dikembangkan — misalnya ketika nanti ingin menambahkan REST API atau antarmuka GUI.
+The tests cover the in-memory business logic, so PostgreSQL does not need to be
+running.
 
----
+## Notes
 
-## 🎯 Tujuan Project
-
-Project ini dibuat untuk melatih dan menunjukkan kemampuan dalam:
-
-- Menulis kode Go yang terstruktur dan modular
-- Menerapkan operasi CRUD dan validasi aturan bisnis
-- Mengelola state dan persistensi data tanpa database
-- Merancang antarmuka CLI yang mudah digunakan
-- Memisahkan model, logika bisnis, dan lapisan penyimpanan
-
-
-
-
+- This project has no login or access control. It is meant for local use or a
+  trusted network.
+- The old JSON file is no longer used for daily storage. It is kept as sample
+  data and as the source for `-import`.
+- The frontend files are embedded into the Go binary, so the web app works even
+  when the binary is started from another directory.
+- `.env` is ignored by Git because it contains the database password.
+  `.env.example` is safe to commit.
+- Files such as `library`, `library.exe`, and `perpuscli` are build results from
+  `go build`, not source files. They are ignored by Git and can be deleted.

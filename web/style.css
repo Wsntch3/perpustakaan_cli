@@ -1,0 +1,294 @@
+:root {
+  --latar: #f5f6f8;
+  --kartu: #ffffff;
+  --teks: #23272f;
+  --samar: #6b7280;
+  --garis: #e3e6eb;
+  --utama: #2563eb;
+  --utama-gelap: #1d4ed8;
+  --merah: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--latar);
+  color: var(--teks);
+  line-height: 1.5;
+}
+
+header {
+  padding: 28px 20px 24px;
+  background: #1f2937;
+  color: #ffffff;
+}
+
+header h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+header p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+main {
+  max-width: 1040px;
+  margin: 24px auto 40px;
+  padding: 0 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--garis);
+  margin-bottom: 18px;
+}
+
+.tab {
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--samar);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--teks);
+}
+
+.tab.active {
+  color: var(--utama);
+  border-bottom-color: var(--utama);
+  font-weight: 600;
+}
+
+.panel {
+  display: none;
+  padding: 22px;
+  background: var(--kartu);
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+}
+
+.panel.active {
+  display: block;
+}
+
+.judul-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.judul-panel h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.form-baris {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  border: 1px solid var(--garis);
+  border-radius: 6px;
+}
+
+input,
+select {
+  padding: 8px 10px;
+  border: 1px solid #cfd5de;
+  border-radius: 5px;
+  background: #ffffff;
+  color: var(--teks);
+  font: inherit;
+  font-size: 14px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: var(--utama);
+}
+
+.form-baris input[name="judul"] {
+  flex: 1 1 240px;
+}
+
+.form-baris input[type="number"] {
+  width: 150px;
+}
+
+.form-baris select {
+  flex: 1 1 200px;
+}
+
+.tombol,
+.kecil {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tombol {
+  background: var(--utama);
+  color: #ffffff;
+}
+
+.tombol:hover {
+  background: var(--utama-gelap);
+}
+
+.kecil {
+  padding: 5px 10px;
+  background: #eef2f7;
+  color: #334155;
+  border-color: #dbe2ea;
+}
+
+.kecil:hover {
+  background: #e2e8f0;
+}
+
+.kecil.bahaya {
+  background: #fef3f2;
+  color: var(--merah);
+  border-color: #fecdca;
+}
+
+.kecil.bahaya:hover {
+  background: #fee4e2;
+}
+
+.tabel-bungkus {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--garis);
+  vertical-align: middle;
+}
+
+th {
+  background: #f8fafc;
+  color: var(--samar);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #fafbfc;
+}
+
+.kolom-aksi {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.kosong {
+  padding: 24px 12px;
+  color: var(--samar);
+  text-align: center;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.aktif {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+.status.selesai {
+  background: #e8f5ec;
+  color: #18794e;
+}
+
+.cek {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--samar);
+  font-size: 14px;
+}
+
+.pesan {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  max-width: 340px;
+  padding: 12px 16px;
+  border: 1px solid #b7e4c7;
+  border-radius: 6px;
+  background: #e8f5ec;
+  color: #14532d;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+
+.pesan.gagal {
+  border-color: #fecdca;
+  background: #fef3f2;
+  color: #7a271a;
+}
+
+footer {
+  padding: 0 20px 30px;
+  color: var(--samar);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  header {
+    padding: 22px 16px;
+  }
+
+  main {
+    margin-top: 16px;
+    padding: 0 12px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .form-baris input,
+  .form-baris select,
+  .form-baris .tombol {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

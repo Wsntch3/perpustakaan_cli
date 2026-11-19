@@ -43,8 +43,18 @@ func loaddata(file string) (*library, error) {
 		l.Peminjaman = []peminjaman{}
 	}
 
-	// Pastikan ID berikutnya selalu lebih besar dari ID yang sudah ada,
-	// termasuk untuk file lama yang belum memiliki counter dengan benar.
+	perbaikiData(&l)
+	return &l, nil
+}
+
+// Rapikan data lama: counter ID dan denda yang sempat tercatat negatif.
+func perbaikiData(l *library) {
+	for i := range l.Peminjaman {
+		if l.Peminjaman[i].Denda < 0 {
+			l.Peminjaman[i].Denda = 0
+		}
+	}
+
 	maxIDBuku := 0
 	for _, b := range l.Buku {
 		if b.ID > maxIDBuku {
@@ -74,6 +84,4 @@ func loaddata(file string) (*library, error) {
 	if l.NewIDpeminjaman <= maxIDPeminjaman {
 		l.NewIDpeminjaman = maxIDPeminjaman + 1
 	}
-
-	return &l, nil
 }
