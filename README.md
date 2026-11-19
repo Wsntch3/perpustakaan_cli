@@ -241,6 +241,21 @@ go test ./...
 The tests cover the in-memory business logic, so PostgreSQL does not need to be
 running.
 
+## Security Notes
+
+- Keep `.env` private. It is ignored by Git and should only be readable by
+  your user (`chmod 600 .env`).
+- `docker-compose.yml` reads the database password from `.env`, so no password
+  is stored in the tracked Compose file.
+- The Docker database is published on `127.0.0.1` only. It cannot be reached
+  from other computers on the network.
+- The application prints the database host and name, but never the password.
+- If a password has been exposed, change it and update `.env`:
+
+  ```sql
+  ALTER ROLE library WITH PASSWORD 'new_password';
+  ```
+
 ## Notes
 
 - This project has no login or access control. It is meant for local use or a
